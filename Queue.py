@@ -43,18 +43,6 @@ for index in range(10):
 len(queue_list)
 
 
-# 재귀함수
-def recursive(data):
-    if data < 0:
-        print("ended")
-    else:
-        print(data)
-        recursive(data - 1)
-        print("returned", data)
-
-
-recursive(4)
-
 # 대문자 M이 몇번이나 나오는가?
 dataset = [
     "Braund, Mr. Owen Harris",
@@ -98,3 +86,11 @@ for el in dataset:
             m_cnt += 1
 
 print(m_cnt)
+
+d2_data = queue.PriorityQueue()
+d2_data.put((10, "dataotaku"))
+d2_data.qsize()
+d2_data.get()
+d2_data.put(
+    (5, "job")
+)  # priority 숫자가 낮은 것이 실제로 우선순위가 높아 먼저 배출된다.
