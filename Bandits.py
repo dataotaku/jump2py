@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 np.random.seed(0)
 
@@ -78,8 +79,6 @@ class Agent:
             return np.random.randint(0, len(self.Qs))  # 무작위 행동선택
         return np.argmax(self.Qs)  # 탐욕행동 선택 - 리스트 Qs의 가장 높은 값의 index값
 
-
-import matplotlib.pyplot as plt
 
 steps = 1000
 epsilon = 0.1
