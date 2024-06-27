@@ -47,3 +47,119 @@ node = head
 while node.next:
     print(node.data)
     node = node.next
+
+
+class NodeMgmt:
+    def __init__(self, data):
+        self.head = Node(data)
+
+    def add(self, data):
+        if self.head == "":
+            self.head = Node(data)
+        else:
+            node = self.head
+            while node.next:
+                node = node.next
+            node.next = Node(data)
+
+    def desc(self):
+        node = self.head
+        while node:
+            print(node.data)
+            node = node.next
+
+    def delete(self, data):
+        if self.head == "":
+            print("찾고 계시는 값이 포함된 노드가 없습니다.")
+            return
+
+        if self.head.data == data:
+            temp = self.head
+            self.head = temp.next
+            del temp
+        else:
+            node = self.head
+            while node.next:
+                if node.next.data == data:
+                    temp = node.next
+                    node.next = temp.next
+                    del temp
+                else:
+                    node = node.next
+
+
+l_list1 = NodeMgmt(0)
+l_list1.desc()
+
+l_list1.head
+l_list1.delete(0)
+l_list1.head
+
+l_list2 = NodeMgmt(0)
+for data in range(1, 10):
+    l_list2.add(data)
+
+l_list2.delete(5)
+l_list2.desc()
+
+
+# 링크드 리스트내 값 검색 메서트 추가
+class NodeMgmt:
+    def __init__(self, data):
+        self.head = Node(data)
+
+    def add(self, data):
+        if self.head == "":
+            self.head = Node(data)
+        else:
+            node = self.head
+            while node.next:
+                node = node.next
+            node.next = Node(data)
+
+    def desc(self):
+        node = self.head
+        while node:
+            print(node.data)
+            node = node.next
+
+    def delete(self, data):
+        if self.head == "":
+            print("찾고 계시는 값이 포함된 노드가 없습니다.")
+            return
+
+        if self.head.data == data:
+            temp = self.head
+            self.head = temp.next
+            del temp
+        else:
+            node = self.head
+            while node.next:
+                if node.next.data == data:
+                    temp = node.next
+                    node.next = temp.next
+                    del temp
+                else:
+                    node = node.next
+
+    def findprint(self, data):
+        if self.head == "":
+            print("빈 링크드 리스트입니다.")
+            return
+        else:
+            node = self.head
+            while node:
+                if node.data == data:
+                    print(node.data)
+                    return
+                else:
+                    node = node.next
+
+
+l_list3 = NodeMgmt(0)
+for i in range(1, 10):
+    l_list3.add(i)
+l_list3.desc()
+
+l_list3.findprint(5)
+l_list3.findprint(4)
