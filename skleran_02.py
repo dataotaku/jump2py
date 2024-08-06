@@ -6,6 +6,7 @@ import pandas as pd
 from IPython.display import display
 import mglearn
 from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_breast_cancer
 
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
@@ -238,3 +239,165 @@ plt.legend(
 plt.xlabel("특성 0")
 plt.ylabel("특성 1")
 plt.show()
+
+
+X = np.array([[0, 1, 0, 1], [1, 0, 1, 1], [0, 0, 0, 1], [1, 0, 1, 0]])
+y = np.array([0, 1, 0, 1])
+y == 0
+X[y == 0]
+X[y == 1]
+
+counts = {}
+for label in np.unique(y):
+    counts[label] = X[y == label].sum(axis=0)
+print("특성 카운트:\n", counts)
+
+from sklearn.tree import DecisionTreeClassifier
+
+cancer = load_breast_cancer()
+X_train, X_test, y_train, y_test = train_test_split(
+    cancer.data, cancer.target, stratify=cancer.target, random_state=42
+)
+tree = DecisionTreeClassifier(random_state=0)
+tree.fit(X_train, y_train)
+print("훈련 세트 정확도: {:.3f}".format(tree.score(X_train, y_train)))
+print("테스트 세트 정확도: {:.3f}".format(tree.score(X_test, y_test)))
+
+tree = DecisionTreeClassifier(max_depth=4, random_state=0)
+tree.fit(X_train, y_train)
+print("훈련 세트 정확도: {:.3f}".format(tree.score(X_train, y_train)))
+print("테스트 세트 정확도: {:.3f}".format(tree.score(X_test, y_test)))
+
+from sklearn.tree import export_graphviz
+
+export_graphviz(
+    tree,
+    out_file="tree.dot",
+    class_names=["negative", "positive"],
+    feature_names=cancer.feature_names,
+    impurity=False,
+    filled=True,
+)
+
+from IPython.display import display
+import graphviz
+
+with open("tree.dot") as f:
+    dot_graph = f.read()
+graph = graphviz.Source(dot_graph)
+graph.render("tree_output", format="png", cleanup=True)
+
+# 저장된 파일을 열기 (Windows 환경)
+import os
+
+os.startfile("tree_output.png")
+
+# 결정 트리 시각화
+from sklearn.tree import plot_tree
+
+plt.figure(figsize=(20, 10))
+plot_tree(
+    tree,
+    class_names=["음성", "양성"],
+    feature_names=cancer.feature_names,
+    filled=True,
+    rounded=True,
+)
+plt.show()
+
+print("특성 중요도:\n", tree.feature_importances_)
+
+
+def plot_feature_importances_cancer(model):
+    n_features = cancer.data.shape[1]
+    plt.barh(range(n_features), model.feature_importances_, align="center")
+    plt.yticks(np.arange(n_features), cancer.feature_names)
+    plt.xlabel("특성 중요도")
+    plt.ylabel("특성")
+    plt.ylim(-1, n_features)
+
+
+plot_feature_importances_cancer(tree)
+plt.show()
+
+tree = mglearn.plots.plot_tree_not_monotone()
+plt.show()
+
+import os
+
+ram_prices = pd.read_csv(os.path.join(mglearn.datasets.DATA_PATH, "ram_price.csv"))
+
+plt.yticks(fontname="Arial")
+plt.semilogy(ram_prices.date, ram_prices.price)
+plt.xlabel("년")
+plt.ylabel("가격 ($/Mbyte)")
+plt.show()
+
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+
+data_train = ram_prices[ram_prices.date < 2000]
+data_test = ram_prices[ram_prices.date >= 2000]
+X_train = data_train.date.values[:, np.newaxis]
+
+y_train = np.log(data_train.price)
+
+tree = DecisionTreeRegressor().fit(X_train, y_train)
+linear_reg = LinearRegression().fit(X_train, y_train)
+
+X_all = ram_prices.date.values[:, np.newaxis]
+pred_tree = tree.predict(X_all)
+pred_lr = linear_reg.predict(X_all)
+
+price_tree = np.exp(pred_tree)
+price_lr = np.exp(pred_lr)
+
+plt.semilogy(data_train.date, data_train.price, label="훈련 데이터")
+plt.semilogy(data_test.date, data_test.price, label="테스트 데이터")
+plt.semilogy(ram_prices.date, price_tree, label="트리 예측")
+plt.semilogy(ram_prices.date, price_lr, label="선형회귀 예측")
+plt.legend()
+plt.show()
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_moons
+
+X, y = make_moons(n_samples=100, noise=0.25, random_state=3)
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
+
+forest = RandomForestClassifier(n_estimators=5, random_state=2)
+forest.fit(X_train, y_train)
+
+fig, axes = plt.subplots(2, 3, figsize=(20, 10))
+for i, (ax, tree) in enumerate(zip(axes.ravel(), forest.estimators_)):
+    ax.set_title("트리 {}".format(i))
+    mglearn.plots.plot_tree_partition(X_train, y_train, tree, ax=ax)
+mglearn.plots.plot_2d_separator(forest, X_train, fill=True, ax=axes[-1, -1], alpha=0.4)
+axes[-1, -1].set_title("랜덤 포레스트")
+mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train)
+plt.show()
+
+X_train, X_test, y_train, y_test = train_test_split(
+    cancer.data, cancer.target, random_state=0
+)
+
+forest = RandomForestClassifier(n_estimators=100, random_state=0)
+forest.fit(X_train, y_train)
+
+print("훈련 세트 정확도: {:.3f}".format(forest.score(X_train, y_train)))
+print("테스트 세트 정확도: {:.3f}".format(forest.score(X_test, y_test)))
+
+plot_feature_importances_cancer(forest)
+plt.show()
+
+from sklearn.ensemble import GradientBoostingClassifier
+
+X_train, X_test, y_train, y_test = train_test_split(
+    cancer.data, cancer.target, random_state=0
+)
+
+gbrt = GradientBoostingClassifier(random_state=0)
+gbrt.fit(X_train, y_train)
+
+print("훈련 세트 정확도: {:.3f}".format(gbrt.score(X_train, y_train)))
+print("테스트 세트 정확도: {:.3f}".format(gbrt.score(X_test, y_test)))
