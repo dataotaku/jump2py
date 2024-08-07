@@ -7,6 +7,17 @@ from IPython.display import display
 import mglearn
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_breast_cancer
+from sklearn.datasets import make_blobs
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import plot_tree
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_moons
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import AdaBoostClassifier
 
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
@@ -129,7 +140,6 @@ plt.show()
 mglearn.plots.plot_linear_svc_regularization()
 plt.show()
 
-from sklearn.datasets import load_breast_cancer
 
 cancer = load_breast_cancer()
 X_train, X_test, y_train, y_test = train_test_split(
@@ -173,6 +183,7 @@ for C, marker in zip([0.001, 1, 100], ["o", "^", "v"]):
         )
     )
     plt.plot(lr_l1.coef_.T, marker, label="C={:.3f}".format(C))
+
 plt.xticks(range(cancer.data.shape[1]), cancer.feature_names, rotation=90)
 plt.hlines(0, 0, cancer.data.shape[1])
 plt.xlabel("특성")
@@ -181,7 +192,6 @@ plt.ylim(-5, 5)
 plt.legend(loc=3)
 plt.show()
 
-from sklearn.datasets import make_blobs
 
 X, y = make_blobs(random_state=42)
 mglearn.discrete_scatter(X[:, 0], X[:, 1], y)
@@ -240,7 +250,7 @@ plt.xlabel("특성 0")
 plt.ylabel("특성 1")
 plt.show()
 
-
+# 나이브 베이즈 분류기
 X = np.array([[0, 1, 0, 1], [1, 0, 1, 1], [0, 0, 0, 1], [1, 0, 1, 0]])
 y = np.array([0, 1, 0, 1])
 y == 0
@@ -252,7 +262,6 @@ for label in np.unique(y):
     counts[label] = X[y == label].sum(axis=0)
 print("특성 카운트:\n", counts)
 
-from sklearn.tree import DecisionTreeClassifier
 
 cancer = load_breast_cancer()
 X_train, X_test, y_train, y_test = train_test_split(
@@ -292,8 +301,27 @@ import os
 
 os.startfile("tree_output.png")
 
+from PIL import Image
+
+# 이미지 파일 열기
+img = Image.open("tree_output.png")
+
+# 이미지 표시
+img.show()
+
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+# 이미지 파일 읽기
+img = mpimg.imread("tree_output.png")
+
+# 이미지 표시
+plt.imshow(img)
+plt.axis("off")  # 축을 숨깁니다.
+plt.show()
+
 # 결정 트리 시각화
-from sklearn.tree import plot_tree
+
 
 plt.figure(figsize=(20, 10))
 plot_tree(
@@ -333,8 +361,6 @@ plt.xlabel("년")
 plt.ylabel("가격 ($/Mbyte)")
 plt.show()
 
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.linear_model import LinearRegression
 
 data_train = ram_prices[ram_prices.date < 2000]
 data_test = ram_prices[ram_prices.date >= 2000]
@@ -359,8 +385,6 @@ plt.semilogy(ram_prices.date, price_lr, label="선형회귀 예측")
 plt.legend()
 plt.show()
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.datasets import make_moons
 
 X, y = make_moons(n_samples=100, noise=0.25, random_state=3)
 X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
@@ -390,7 +414,6 @@ print("테스트 세트 정확도: {:.3f}".format(forest.score(X_test, y_test)))
 plot_feature_importances_cancer(forest)
 plt.show()
 
-from sklearn.ensemble import GradientBoostingClassifier
 
 X_train, X_test, y_train, y_test = train_test_split(
     cancer.data, cancer.target, random_state=0
@@ -401,3 +424,146 @@ gbrt.fit(X_train, y_train)
 
 print("훈련 세트 정확도: {:.3f}".format(gbrt.score(X_train, y_train)))
 print("테스트 세트 정확도: {:.3f}".format(gbrt.score(X_test, y_test)))
+
+
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# 데이터 로드
+iris = load_iris()
+X, y = iris.data, iris.target
+
+# 훈련 데이터와 테스트 데이터로 분할
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# BaggingClassifier 생성
+bagging_clf = BaggingClassifier(
+    estimator=DecisionTreeClassifier(),
+    n_estimators=50,
+    max_samples=0.8,
+    max_features=0.5,
+    bootstrap=True,
+    bootstrap_features=False,
+    oob_score=True,
+    n_jobs=-1,
+    random_state=42,
+    verbose=1,
+)
+
+# 모델 학습
+bagging_clf.fit(X_train, y_train)
+
+# 예측
+y_pred = bagging_clf.predict(X_test)
+
+# 정확도 평가
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy:.2f}")
+
+# OOB 점수 출력
+if bagging_clf.oob_score:
+    print(f"OOB Score: {bagging_clf.oob_score_:.2f}")
+
+# bagging_clf.oob_decision_function_은 각 샘플의 클래스 확률을 반환합니다.
+# feature_importances_는 배깅 분류기에서는 제공하지 않습니다.
+# plt.barh(range(X.shape[1]), bagging_clf.feature_importances_,
+#          align='center')
+# plt.yticks(np.arange(X.shape[1]), iris.feature_names)
+# plt.xlabel("특성 중요도")
+# plt.ylabel("특성")
+# plt.ylim(-1, X.shape[1])
+# plt.show()
+
+from sklearn.tree import ExtraTreeClassifier
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# 데이터 로드
+iris = load_iris()
+X, y = iris.data, iris.target
+
+# 훈련 데이터와 테스트 데이터로 분할
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# ExtraTreeClassifier 생성
+extra_tree_clf = ExtraTreeClassifier(
+    criterion="entropy",
+    splitter="random",
+    max_depth=None,
+    min_samples_split=2,
+    min_samples_leaf=1,
+    min_weight_fraction_leaf=0.0,
+    max_features=None,
+    random_state=42,
+    max_leaf_nodes=None,
+    min_impurity_decrease=0.0,
+    class_weight=None,
+    ccp_alpha=0.0,
+)
+
+# 모델 학습
+extra_tree_clf.fit(X_train, y_train)
+
+# 예측
+y_pred = extra_tree_clf.predict(X_test)
+
+# 정확도 평가
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy:.2f}")
+
+plt.barh(range(X.shape[1]), extra_tree_clf.feature_importances_, align="center")
+plt.yticks(np.arange(X.shape[1]), iris.feature_names)
+plt.xlabel("특성 중요도")
+plt.ylabel("특성")
+plt.ylim(-1, X.shape[1])
+plt.show()
+
+
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# 데이터 로드
+iris = load_iris()
+X, y = iris.data, iris.target
+
+# 훈련 데이터와 테스트 데이터로 분할
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# AdaBoostClassifier 생성
+ada_clf = AdaBoostClassifier(
+    estimator=DecisionTreeClassifier(max_depth=1),
+    n_estimators=50,
+    learning_rate=1.0,
+    algorithm="SAMME",
+    random_state=42,
+)
+
+# 모델 학습
+ada_clf.fit(X_train, y_train)
+
+# 예측
+y_pred = ada_clf.predict(X_test)
+
+# 정확도 평가
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy:.2f}")
+
+plt.barh(range(X.shape[1]), ada_clf.feature_importances_, align="center")
+plt.yticks(np.arange(X.shape[1]), iris.feature_names)
+plt.xlabel("특성 중요도")
+plt.ylabel("특성")
+plt.ylim(-1, X.shape[1])
+plt.show()
