@@ -39,3 +39,191 @@ else:
 
 # 음수 기호가 깨지는 문제 해결
 rc("axes", unicode_minus=False)
+
+X, y = make_blobs(centers=4, random_state=8)
+y = y % 2
+
+mglearn.discrete_scatter(X[:, 0], X[:, 1], y)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
+
+# LinearSVC로 훈련
+from sklearn.svm import LinearSVC
+
+linear_svm = LinearSVC().fit(X, y)
+
+mglearn.plots.plot_2d_separator(linear_svm, X)
+mglearn.discrete_scatter(X[:, 0], X[:, 1], y)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
+
+# 두 번째 특성을 제곱하여 추가
+X_new = np.hstack([X, X[:, 1:] ** 2])
+from mpl_toolkits.mplot3d import Axes3D, axes3d
+
+figure = plt.figure()
+# 3차원 그래프
+# ax = Axes3D(figure, elev=-152, azim=-26)
+ax = figure.add_subplot(111, projection="3d", elev=-100, azim=-40)
+# y == 0인 포인트를 먼저 그리고 그다음 y == 1인 포인트를 그립니다.
+mask = y == 0
+ax.scatter(
+    X_new[mask, 0],
+    X_new[mask, 1],
+    X_new[mask, 2],
+    c="b",
+    cmap=mglearn.cm2,
+    s=60,
+    edgecolor="k",
+)
+ax.scatter(
+    X_new[~mask, 0],
+    X_new[~mask, 1],
+    X_new[~mask, 2],
+    c="r",
+    marker="^",
+    cmap=mglearn.cm2,
+    s=60,
+    edgecolor="k",
+)
+ax.set_xlabel("특성0")
+ax.set_ylabel("특성1")
+ax.set_zlabel("특성1 ** 2")
+plt.show()
+
+linear_svm_3d = LinearSVC().fit(X_new, y)
+coef, intercept = linear_svm_3d.coef_.ravel(), linear_svm_3d.intercept_
+figure = plt.figure()
+# 3차원 그래프
+ax = figure.add_subplot(111, projection="3d", elev=-152, azim=-26)
+xx = np.linspace(X_new[:, 0].min() - 2, X_new[:, 0].max() + 2, 50)
+yy = np.linspace(X_new[:, 1].min() - 2, X_new[:, 1].max() + 2, 50)
+XX, YY = np.meshgrid(xx, yy)
+ZZ = (coef[0] * XX + coef[1] * YY + intercept) / -coef[2]
+ax.plot_surface(XX, YY, ZZ, rstride=8, cstride=8, alpha=0.3)
+ax.scatter(
+    X_new[mask, 0],
+    X_new[mask, 1],
+    X_new[mask, 2],
+    c="b",
+    cmap=mglearn.cm2,
+    s=60,
+    edgecolor="k",
+)
+ax.scatter(
+    X_new[~mask, 0],
+    X_new[~mask, 1],
+    X_new[~mask, 2],
+    c="r",
+    marker="^",
+    cmap=mglearn.cm2,
+    s=60,
+    edgecolor="k",
+)
+ax.set_xlabel("특성0")
+ax.set_ylabel("특성1")
+ax.set_zlabel("특성1 ** 2")
+plt.show()
+
+ZZ = YY**2
+dec = linear_svm_3d.decision_function(np.c_[XX.ravel(), YY.ravel(), ZZ.ravel()])
+plt.contourf(
+    XX,
+    YY,
+    dec.reshape(XX.shape),
+    levels=[dec.min(), 0, dec.max()],
+    cmap=mglearn.cm2,
+    alpha=0.5,
+)
+mglearn.discrete_scatter(X[:, 0], X[:, 1], y)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
+
+from sklearn.svm import SVC
+
+X, y = mglearn.tools.make_handcrafted_dataset()
+svm = SVC(kernel="rbf", C=10, gamma=0.1).fit(X, y)
+mglearn.plots.plot_2d_separator(svm, X, eps=0.5)
+mglearn.discrete_scatter(X[:, 0], X[:, 1], y)
+# 서포트 벡터
+sv = svm.support_vectors_
+# dual_coef_의 부호에 의해 서포트 벡터의 클래스 레이블이 결정됩니다.
+sv_labels = svm.dual_coef_.ravel() > 0
+mglearn.discrete_scatter(sv[:, 0], sv[:, 1], sv_labels, s=15, markeredgewidth=3)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
+
+fig, axes = plt.subplots(3, 3, figsize=(15, 10))
+
+for ax, C in zip(axes, [-1, 0, 3]):
+    for a, gamma in zip(ax, range(-1, 2)):
+        mglearn.plots.plot_svm(log_C=C, log_gamma=gamma, ax=a)
+
+axes[0, 0].legend(
+    ["클래스 0", "클래스 1", "클래스 0 서포트 벡터", "클래스 1 서포트 벡터"],
+    ncol=4,
+    loc=(0.9, 1.2),
+)
+plt.show()
+
+cancer = load_breast_cancer()
+
+X_train, X_test, y_train, y_test = train_test_split(
+    cancer.data, cancer.target, random_state=0
+)
+
+svc = SVC()
+svc.fit(X_train, y_train)
+
+print("훈련 세트 정확도: {:.2f}".format(svc.score(X_train, y_train)))
+print("테스트 세트 정확도: {:.2f}".format(svc.score(X_test, y_test)))
+
+
+plt.boxplot(X_train)
+plt.yscale("symlog")
+plt.xlabel("특성 목록")
+plt.ylabel("특성 크기")
+plt.show()
+
+from sklearn.neural_network import MLPClassifier
+from sklearn.datasets import make_moons
+
+X, y = make_moons(n_samples=100, noise=0.25, random_state=3)
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
+
+mlp = MLPClassifier(solver="lbfgs", random_state=0).fit(X_train, y_train)
+mglearn.plots.plot_2d_separator(mlp, X_train, fill=True, alpha=0.3)
+mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
+
+mlp = MLPClassifier(solver="lbfgs", random_state=0, hidden_layer_sizes=[10])
+mlp.fit(X_train, y_train)
+mglearn.plots.plot_2d_separator(mlp, X_train, fill=True, alpha=0.3)
+mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
+
+mlp = MLPClassifier(solver="lbfgs", random_state=0, hidden_layer_sizes=[10, 10])
+mlp.fit(X_train, y_train)
+mglearn.plots.plot_2d_separator(mlp, X_train, fill=True, alpha=0.3)
+mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
+
+mlp = MLPClassifier(
+    solver="lbfgs", activation="tanh", random_state=0, hidden_layer_sizes=[10, 10]
+)
+mlp.fit(X_train, y_train)
+mglearn.plots.plot_2d_separator(mlp, X_train, fill=True, alpha=0.3)
+mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train)
+plt.xlabel("특성 0")
+plt.ylabel("특성 1")
+plt.show()
