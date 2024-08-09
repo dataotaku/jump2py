@@ -24,9 +24,7 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 
 # Windows의 경우
-font_name = font_manager.FontProperties(
-    fname="c:/Windows/Fonts/malgun.ttf"
-).get_name()
+font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
 rc("font", family=font_name)
 
 mglearn.plots.plot_scaling()
@@ -37,6 +35,7 @@ plt.show()
 # 4.1.2 데이터 변환 적용하기
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
+
 cancer = load_breast_cancer()
 X_train, X_test, y_train, y_test = train_test_split(
     cancer.data, cancer.target, random_state=1
@@ -45,29 +44,29 @@ print(X_train.shape)
 print(X_test.shape)
 
 from sklearn.preprocessing import MinMaxScaler
+
 scaler = MinMaxScaler()
 scaler.fit(X_train)
 X_train_scaled = scaler.transform(X_train)
 print("변환된 후 크기: {}".format(X_train_scaled.shape))
 print("스케일 조정 전 특성별 최소값:\n{}".format(X_train.min(axis=0)))
 print("스케일 조정 전 특성별 최대값:\n{}".format(X_train.max(axis=0)))
-print("스케일 조정 후 특성별 최소값:\n{}".format(
-    X_train_scaled.min(axis=0)))
-print("스케일 조정 후 특성별 최대값:\n{}".format(
-    X_train_scaled.max(axis=0)))
+print("스케일 조정 후 특성별 최소값:\n{}".format(X_train_scaled.min(axis=0)))
+print("스케일 조정 후 특성별 최대값:\n{}".format(X_train_scaled.max(axis=0)))
 
 from sklearn.datasets import make_blobs
+
 # 인위적인 데이터셋 생성
 X, _ = make_blobs(n_samples=50, centers=5, random_state=4, cluster_std=2)
 # 훈련 세트와 테스트 세트로 나눕니다
-X_train, X_test = train_test_split(X, random_state=5, test_size=.1)
+X_train, X_test = train_test_split(X, random_state=5, test_size=0.1)
 
 fig, axes = plt.subplots(1, 3, figsize=(13, 4))
-axes[0].scatter(X_train[:, 0], X_train[:, 1],
-                c=mglearn.cm2(0), label="훈련 세트", s=60)
-axes[0].scatter(X_test[:, 0], X_test[:, 1], marker='^',
-                c=mglearn.cm2(1), label="테스트 세트", s=60)
-axes[0].legend(loc='upper left')
+axes[0].scatter(X_train[:, 0], X_train[:, 1], c=mglearn.cm2(0), label="훈련 세트", s=60)
+axes[0].scatter(
+    X_test[:, 0], X_test[:, 1], marker="^", c=mglearn.cm2(1), label="테스트 세트", s=60
+)
+axes[0].legend(loc="upper left")
 axes[0].set_title("원본 데이터")
 
 scaler = MinMaxScaler()
@@ -75,10 +74,21 @@ scaler.fit(X_train)
 X_train_scaled = scaler.transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-axes[1].scatter(X_train_scaled[:, 0], X_train_scaled[:, 1],
-                c=mglearn.cm2(0), label="훈련 세트", s=60)
-axes[1].scatter(X_test_scaled[:, 0], X_test_scaled[:, 1], marker='^',
-                c=mglearn.cm2(1), label="테스트 세트", s=60)
+axes[1].scatter(
+    X_train_scaled[:, 0],
+    X_train_scaled[:, 1],
+    c=mglearn.cm2(0),
+    label="훈련 세트",
+    s=60,
+)
+axes[1].scatter(
+    X_test_scaled[:, 0],
+    X_test_scaled[:, 1],
+    marker="^",
+    c=mglearn.cm2(1),
+    label="테스트 세트",
+    s=60,
+)
 axes[1].set_title("스케일 조정된 데이터")
 
 # 테스트 세트의 스케일을 따로 조정합니다
@@ -88,15 +98,26 @@ test_scaler = MinMaxScaler()
 test_scaler.fit(X_test)
 X_test_scaled_badly = test_scaler.transform(X_test)
 
-axes[2].scatter(X_train_scaled[:, 0], X_train_scaled[:, 1],
-                c=mglearn.cm2(0), label="훈련 세트", s=60)
-axes[2].scatter(X_test_scaled_badly[:, 0], X_test_scaled_badly[:, 1],
-                marker='^', c=mglearn.cm2(1), label="테스트 세트", s=60)
+axes[2].scatter(
+    X_train_scaled[:, 0],
+    X_train_scaled[:, 1],
+    c=mglearn.cm2(0),
+    label="훈련 세트",
+    s=60,
+)
+axes[2].scatter(
+    X_test_scaled_badly[:, 0],
+    X_test_scaled_badly[:, 1],
+    marker="^",
+    c=mglearn.cm2(1),
+    label="테스트 세트",
+    s=60,
+)
 axes[2].set_title("잘못 조정된 데이터")
 
 for ax in axes:
     ax.set_xlabel("특성 0")
-    ax.set_ylabel("특성 1") 
+    ax.set_ylabel("특성 1")
 plt.show()
 
 # 3.4.1 주성분분석
@@ -111,8 +132,8 @@ malignant = cancer.data[cancer.target == 0]
 ax = axes.ravel()
 for i in range(10):
     _, bins = np.histogram(cancer.data[:, i], bins=50)
-    ax[i].hist(benign[:, i], bins=bins, color=mglearn.cm3(0), alpha=.5)
-    ax[i].hist(malignant[:, i], bins=bins, color=mglearn.cm3(2), alpha=.5)
+    ax[i].hist(benign[:, i], bins=bins, color=mglearn.cm3(0), alpha=0.5)
+    ax[i].hist(malignant[:, i], bins=bins, color=mglearn.cm3(2), alpha=0.5)
     ax[i].set_title(cancer.feature_names[i])
     ax[i].set_yticks(())
 ax[0].set_xlabel("특성 크기")
@@ -122,8 +143,10 @@ fig.tight_layout()
 plt.show()
 
 from sklearn.svm import SVC
+
 X_train, X_test, y_train, y_test = train_test_split(
-    cancer.data, cancer.target, random_state=0)
+    cancer.data, cancer.target, random_state=0
+)
 scaler = StandardScaler()
 scaler.fit(X_train)
 X_train_scaled = scaler.transform(X_train)
@@ -137,6 +160,7 @@ scaler.fit(cancer.data)
 X_scaled = scaler.transform(cancer.data)
 
 from sklearn.decomposition import PCA
+
 # 데이터의 처음 두 개 주성분만 유지시킵니다
 pca = PCA(n_components=2)
 # 유방암 데이터로 PCA 모델을 만듭니다
@@ -155,10 +179,10 @@ plt.ylabel("두 번째 주성분")
 plt.show()
 
 from sklearn.datasets import fetch_lfw_people
+
 people = fetch_lfw_people(min_faces_per_person=20, resize=0.7)
 image_shape = people.images[0].shape
-fig, axes = plt.subplots(2, 5, figsize=(15, 8),
-                         subplot_kw={'xticks': (), 'yticks': ()})
+fig, axes = plt.subplots(2, 5, figsize=(15, 8), subplot_kw={"xticks": (), "yticks": ()})
 for target, image, ax in zip(people.target, people.images, axes.ravel()):
     ax.imshow(image)
     ax.set_title(people.target_names[target])
@@ -185,12 +209,14 @@ y_people = people.target[mask]
 
 # 0~255 사이의 흑백 이미지의 픽셀 값을 0~1 사이로 스케일 조정합니다
 # (옮긴이) MinMaxScaler를 적용하는 것과 거의 동일합니다
-X_people = X_people / 255.
+X_people = X_people / 255.0
 
 from sklearn.neighbors import KNeighborsClassifier
+
 # 데이터를 훈련 세트와 테스트 세트로 나눕니다
 X_train, X_test, y_train, y_test = train_test_split(
-    X_people, y_people, stratify=y_people, random_state=0)
+    X_people, y_people, stratify=y_people, random_state=0
+)
 # 이웃 개수를 한 개로 하여 KNeighborsClassifier 모델을 만듭니다
 knn = KNeighborsClassifier(n_neighbors=1)
 knn.fit(X_train, y_train)
@@ -211,11 +237,11 @@ print("테스트 세트 정확도: {:.2f}".format(knn.score(X_test_pca, y_test))
 
 print("pca.components_.shape: {}".format(pca.components_.shape))
 
-fig, axes = plt.subplots(3, 5, figsize=(15, 12),
-                            subplot_kw={'xticks': (), 'yticks': ()})
+fig, axes = plt.subplots(
+    3, 5, figsize=(15, 12), subplot_kw={"xticks": (), "yticks": ()}
+)
 for i, (component, ax) in enumerate(zip(pca.components_, axes.ravel())):
-    ax.imshow(component.reshape(image_shape),
-                cmap='viridis')
+    ax.imshow(component.reshape(image_shape), cmap="viridis")
     ax.set_title("주성분 {}".format((i + 1)))
 plt.show()
 
@@ -226,13 +252,15 @@ mglearn.plots.plot_nmf_faces(X_train, X_test, image_shape)
 plt.show()
 
 from sklearn.decomposition import NMF
+
 nmf = NMF(n_components=15, random_state=0, max_iter=1000, tol=1e-2)
 nmf.fit(X_train)
 X_train_nmf = nmf.transform(X_train)
 X_test_nmf = nmf.transform(X_test)
 
-fix, axes = plt.subplots(3, 5, figsize=(15, 12),
-                            subplot_kw={'xticks': (), 'yticks': ()})
+fix, axes = plt.subplots(
+    3, 5, figsize=(15, 12), subplot_kw={"xticks": (), "yticks": ()}
+)
 for i, (component, ax) in enumerate(zip(nmf.components_, axes.ravel())):
     ax.imshow(component.reshape(image_shape))
     ax.set_title("성분 {}".format(i))
@@ -241,8 +269,7 @@ plt.show()
 compn = 3
 # 3번째 성분을 사용하여 이미지 변환
 inds = np.argsort(X_train_nmf[:, compn])[::-1]
-fig, axes = plt.subplots(2, 5, figsize=(15, 8),
-                            subplot_kw={'xticks': (), 'yticks': ()})
+fig, axes = plt.subplots(2, 5, figsize=(15, 8), subplot_kw={"xticks": (), "yticks": ()})
 for i, (ind, ax) in enumerate(zip(inds, axes.ravel())):
     ax.imshow(X_train[ind].reshape(image_shape))
 plt.show()
@@ -250,15 +277,14 @@ plt.show()
 compn = 7
 # 7번째 성분을 사용하여 이미지 변환
 inds = np.argsort(X_train_nmf[:, compn])[::-1]
-fig, axes = plt.subplots(2, 5, figsize=(15, 8),
-                            subplot_kw={'xticks': (), 'yticks': ()})
+fig, axes = plt.subplots(2, 5, figsize=(15, 8), subplot_kw={"xticks": (), "yticks": ()})
 for i, (ind, ax) in enumerate(zip(inds, axes.ravel())):
     ax.imshow(X_train[ind].reshape(image_shape))
 plt.show()
 
 S = mglearn.datasets.make_signals()
 plt.figure(figsize=(6, 1))
-plt.plot(S, '-')
+plt.plot(S, "-")
 plt.xlabel("시간")
 plt.ylabel("신호")
 plt.show()
@@ -276,22 +302,23 @@ H = pca.fit_transform(X)
 print("PCA로 복원한 신호 데이터 형태: {}".format(H.shape))
 
 models = [X, S, S_, H]
-names = ['측정 신호 (처음 3개)',
-         '원본 신호',
-         'NMF로 복원한 신호',
-         'PCA로 복원한 신호']
+names = ["측정 신호 (처음 3개)", "원본 신호", "NMF로 복원한 신호", "PCA로 복원한 신호"]
 
-fig, axes = plt.subplots(4, figsize=(8, 4), gridspec_kw={'hspace': .5},
-                            subplot_kw={'xticks': (), 'yticks': ()})
+fig, axes = plt.subplots(
+    4,
+    figsize=(8, 4),
+    gridspec_kw={"hspace": 0.5},
+    subplot_kw={"xticks": (), "yticks": ()},
+)
 for model, name, ax in zip(models, names, axes):
     ax.set_title(name)
-    ax.plot(model[:, :3], '-')
+    ax.plot(model[:, :3], "-")
 plt.show()
 
 from sklearn.datasets import load_digits
+
 digits = load_digits()
-fig, axes = plt.subplots(2, 5, figsize=(10, 5),
-                            subplot_kw={'xticks': (), 'yticks': ()})
+fig, axes = plt.subplots(2, 5, figsize=(10, 5), subplot_kw={"xticks": (), "yticks": ()})
 for ax, img in zip(axes.ravel(), digits.images):
     ax.imshow(img)
 plt.show()
@@ -300,21 +327,36 @@ pca = PCA(n_components=2)
 pca.fit(digits.data)
 digits_pca = pca.transform(digits.data)
 
-colors = ["#476A2A", "#7851B8", "#BD3430", "#4A2D4E", "#875525",
-          "#A83683", "#4E655E", "#853541", "#3A3120", "#535D8E"]
+colors = [
+    "#476A2A",
+    "#7851B8",
+    "#BD3430",
+    "#4A2D4E",
+    "#875525",
+    "#A83683",
+    "#4E655E",
+    "#853541",
+    "#3A3120",
+    "#535D8E",
+]
 plt.figure(figsize=(10, 10))
 plt.xlim(digits_pca[:, 0].min(), digits_pca[:, 0].max())
 plt.ylim(digits_pca[:, 1].min(), digits_pca[:, 1].max())
 for i in range(len(digits.data)):
     # 숫자 텍스트를 이용해 산점도를 그립니다
-    plt.text(digits_pca[i, 0], digits_pca[i, 1], str(digits.target[i]),
-                color = colors[digits.target[i]],
-                fontdict={'weight': 'bold', 'size': 9})
+    plt.text(
+        digits_pca[i, 0],
+        digits_pca[i, 1],
+        str(digits.target[i]),
+        color=colors[digits.target[i]],
+        fontdict={"weight": "bold", "size": 9},
+    )
 plt.xlabel("첫 번째 주성분")
 plt.ylabel("두 번째 주성분")
 plt.show()
-          
+
 from sklearn.manifold import TSNE
+
 tsne = TSNE(random_state=42)
 # TSNE에는 transform 메서드가 없으므로 대신 fit_transform을 사용합니다
 digits_tsne = tsne.fit_transform(digits.data)
@@ -324,9 +366,13 @@ plt.xlim(digits_tsne[:, 0].min(), digits_tsne[:, 0].max() + 1)
 plt.ylim(digits_tsne[:, 1].min(), digits_tsne[:, 1].max() + 1)
 for i in range(len(digits.data)):
     # 숫자 텍스트를 이용해 산점도를 그립니다
-    plt.text(digits_tsne[i, 0], digits_tsne[i, 1], str(digits.target[i]),
-                color = colors[digits.target[i]],
-                fontdict={'weight': 'bold', 'size': 9})
+    plt.text(
+        digits_tsne[i, 0],
+        digits_tsne[i, 1],
+        str(digits.target[i]),
+        color=colors[digits.target[i]],
+        fontdict={"weight": "bold", "size": 9},
+    )
 plt.xlabel("t-SNE 특성 0")
 plt.ylabel("t-SNE 특성 1")
 plt.show()
@@ -340,6 +386,7 @@ plt.show()
 
 from sklearn.datasets import make_blobs
 from sklearn.cluster import DBSCAN
+
 X, y = make_blobs(random_state=0, n_samples=12)
 dbscan = DBSCAN()
 clusters = dbscan.fit_predict(X)
