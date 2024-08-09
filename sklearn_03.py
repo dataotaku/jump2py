@@ -227,3 +227,95 @@ mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train)
 plt.xlabel("특성 0")
 plt.ylabel("특성 1")
 plt.show()
+
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.datasets import make_circles
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+X, y = make_circles(noise=0.25, factor=0.5, random_state=1)
+# 예제를 위해 클래스의 이름을 "blue"와 "red"로 바꿉니다.
+y_named = np.array(["blue", "red"])[y]
+# 여러 개의 배열을 한꺼번에 train_test_split에 넣을 수 있습니다.
+# 훈련 세트와 테스트 세트로 나뉘는 방식은 모두 같습니다.
+X_train, X_test, y_train_named, y_test_named, y_train, y_test = train_test_split(
+    X, y_named, y, random_state=0
+)
+# 그래디언트 부스팅 모델을 만듭니다
+gbrt = GradientBoostingClassifier(random_state=0)
+gbrt.fit(X_train, y_train_named)
+
+print("X_test.shape:", X_test.shape)
+print("결정 함수 결과 형태:", gbrt.decision_function(X_test).shape)
+
+print("결정 함수:\n", gbrt.decision_function(X_test)[:6])
+
+print("임계치와 결정 함수 결과 비교:\n", gbrt.decision_function(X_test) > 0)
+print("예측:\n", gbrt.predict(X_test))
+
+greater_zero = (gbrt.decision_function(X_test) > 0).astype(int)
+pred = gbrt.classes_[greater_zero]
+print("pred는 예측 결과와 같다:", np.all(pred == gbrt.predict(X_test)))
+
+decision_function = gbrt.decision_function(X_test)
+print("결정 함수 최솟값:", np.min(decision_function))
+print("결정 함수 최댓값:", np.max(decision_function))
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+mglearn.tools.plot_2d_separator(
+    gbrt, X, ax=axes[0], alpha=0.4, fill=True, cm=mglearn.cm2
+)
+scores_image = mglearn.tools.plot_2d_scores(
+    gbrt, X, ax=axes[1], alpha=0.4, cm=mglearn.ReBl
+)
+for ax in axes:
+    # 훈련 포인트와 테스트 포인트를 그리기
+    mglearn.discrete_scatter(X_test[:, 0], X_test[:, 1], y_test, markers="^", ax=ax)
+    mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train, markers="o", ax=ax)
+    ax.set_xlabel("특성 0")
+    ax.set_ylabel("특성 1")
+cbar = plt.colorbar(scores_image, ax=axes.tolist())
+plt.show()
+
+print("확률 값의 형태:", gbrt.predict_proba(X_test).shape)
+
+print("예측 확률:\n", gbrt.predict_proba(X_test[:6]))
+
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+
+sep_image = mglearn.tools.plot_2d_separator(
+    gbrt, X, ax=axes[0], alpha=0.4, fill=True, cm=mglearn.cm2
+)
+scores_image = mglearn.tools.plot_2d_scores(
+    gbrt, X, ax=axes[1], alpha=0.5, cm=mglearn.ReBl, function="predict_proba"
+)
+for ax in axes:
+    # 훈련 포인트와 테스트 포인트를 그리기
+    mglearn.discrete_scatter(X_test[:, 0], X_test[:, 1], y_test, markers="^", ax=ax)
+    mglearn.discrete_scatter(X_train[:, 0], X_train[:, 1], y_train, markers="o", ax=ax)
+    ax.set_xlabel("특성 0")
+    ax.set_ylabel("특성 1")
+
+fig.colorbar(scores_image, ax=axes[1])
+fig.colorbar(sep_image, ax=axes[0])
+axes[0].legend(
+    ["테스트 클래스 0", "테스트 클래스 1", "훈련 클래스 0", "훈련 클래스 1"],
+    ncol=4,
+    loc=(0.1, 1.1),
+)
+fig.tight_layout()
+plt.show()
+
+from sklearn.datasets import load_iris
+
+iris = load_iris()
+X_train, X_test, y_train, y_test = train_test_split(
+    iris.data, iris.target, random_state=42
+)
+
+gbrt = GradientBoostingClassifier(learning_rate=0.01, random_state=0)
+gbrt.fit(X_train, y_train)
+
+print("결정 함수의 결과 형태:", gbrt.decision_function(X_test).shape)
+print("결정 함수 결과:\n", gbrt.decision_function(X_test)[:6, :])
