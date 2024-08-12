@@ -260,3 +260,118 @@ mglearn.tools.heatmap(
     cmap="viridis",
 )
 plt.show()
+
+from sklearn.datasets import load_digits
+
+digits = load_digits()
+y = digits.target == 9
+X_train, X_test, y_train, y_test = train_test_split(digits.data, y, random_state=0)
+
+from sklearn.dummy import DummyClassifier
+
+dummy_majority = DummyClassifier(strategy="most_frequent").fit(X_train, y_train)
+pred_most_frequent = dummy_majority.predict(X_test)
+print("예측된 유니크 레이블: {}".format(np.unique(pred_most_frequent)))
+print("테스트 점수: {:.2f}".format(dummy_majority.score(X_test, y_test)))
+
+from sklearn.tree import DecisionTreeClassifier
+
+tree = DecisionTreeClassifier(max_depth=2).fit(X_train, y_train)
+pred_tree = tree.predict(X_test)
+print("테스트 점수: {:.2f}".format(tree.score(X_test, y_test)))
+
+from sklearn.linear_model import LogisticRegression
+
+dummy = DummyClassifier(strategy="stratified").fit(X_train, y_train)
+pred_dummy = dummy.predict(X_test)
+print("dummy 점수: {:.2f}".format(dummy.score(X_test, y_test)))
+
+logreg = LogisticRegression(C=0.1, max_iter=1000).fit(X_train, y_train)
+pred_logreg = logreg.predict(X_test)
+print("logreg 점수: {:.2f}".format(logreg.score(X_test, y_test)))
+
+from sklearn.metrics import confusion_matrix
+
+confusion = confusion_matrix(y_test, pred_logreg)
+print("오차 행렬:\n{}".format(confusion))
+
+mglearn.plots.plot_confusion_matrix_illustration()
+plt.show()
+
+mglearn.plots.plot_binary_confusion_matrix()
+plt.show()
+
+print("빈도 기반 더미 모델:")
+print(confusion_matrix(y_test, pred_most_frequent))
+print("\n무작위 더미 모델:")
+print(confusion_matrix(y_test, pred_dummy))
+print("\n결정 트리:")
+print(confusion_matrix(y_test, pred_tree))
+print("\n로지스틱 회귀")
+print(confusion_matrix(y_test, pred_logreg))
+
+from sklearn.metrics import f1_score
+
+print(
+    "빈도 기반 더미 모델의 f1 score: {:.2f}".format(
+        f1_score(y_test, pred_most_frequent)
+    )
+)
+print("무작위 더미 모델의 f1 score: {:.2f}".format(f1_score(y_test, pred_dummy)))
+
+print("결정 트리의 f1 score: {:.2f}".format(f1_score(y_test, pred_tree)))
+print("로지스틱 회귀의 f1 score: {:.2f}".format(f1_score(y_test, pred_logreg)))
+
+from sklearn.metrics import classification_report
+
+print(classification_report(y_test, pred_most_frequent, target_names=["9 아님", "9"]))
+print(classification_report(y_test, pred_dummy, target_names=["9 아님", "9"]))
+print(classification_report(y_test, pred_tree, target_names=["9 아님", "9"]))
+print(classification_report(y_test, pred_logreg, target_names=["9 아님", "9"]))
+print(classification_report(y_test, pred_logreg, target_names=["9 아님", "9"]))
+
+from mglearn.datasets import make_blobs
+from sklearn.svm import SVC
+
+X, y = make_blobs(n_samples=(400, 50), cluster_std=[7.0, 2], random_state=22)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+svc = SVC(gamma=0.05).fit(X_train, y_train)
+mglearn.plots.plot_decision_threshold()
+plt.show()
+
+print(classification_report(y_test, svc.predict(X_test)))
+
+y_pred_lower_threshold = svc.decision_function(X_test) > -0.8
+print(classification_report(y_test, y_pred_lower_threshold))
+
+from sklearn.metrics import precision_recall_curve
+
+precision, recall, thresholds = precision_recall_curve(
+    y_test, svc.decision_function(X_test)
+)
+
+# 부드러운 곡선을 위해 데이터 포인트 수를 늘립니다
+X, y = make_blobs(n_samples=(4000, 500), cluster_std=[7.0, 2], random_state=22)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+svc = SVC(gamma=0.05).fit(X_train, y_train)
+precision, recall, thresholds = precision_recall_curve(
+    y_test, svc.decision_function(X_test)
+)
+# 0에 가까운 임계값을 찾습니다
+close_zero = np.argmin(np.abs(thresholds))
+
+plt.plot(
+    precision[close_zero],
+    recall[close_zero],
+    "o",
+    markersize=10,
+    label="임계값 0",
+    fillstyle="none",
+    c="k",
+    mew=2,
+)
+plt.plot(precision, recall, label="정밀도-재현율 곡선")
+plt.xlabel("정밀도")
+plt.ylabel("재현율")
+plt.legend(loc="best")
+plt.show()
