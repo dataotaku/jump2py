@@ -209,3 +209,54 @@ test_score = svm.score(X_test, y_test)
 print("검증 세트에서 최고 점수: {:.2f}".format(best_score))
 print("최적 매개변수: ", best_parameters)
 print("최적 매개변수에서 테스트 세트 점수: {:.2f}".format(test_score))
+
+mglearn.plots.plot_cross_val_selection()
+plt.show()
+
+mglearn.plots.plot_grid_search_overview()
+plt.show()
+
+param_grid = {
+    "C": [0.001, 0.01, 0.1, 1, 10, 100],
+    "gamma": [0.001, 0.01, 0.1, 1, 10, 100],
+}
+print("매개변수 그리드:\n{}".format(param_grid))
+
+from sklearn.model_selection import GridSearchCV
+
+grid_search = GridSearchCV(SVC(), param_grid, cv=5, return_train_score=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    iris.data, iris.target, random_state=0
+)
+grid_search.fit(X_train, y_train)
+
+print("테스트 세트 점수: {:.2f}".format(grid_search.score(X_test, y_test)))
+
+print("최적 매개변수: {}".format(grid_search.best_params_))
+print("최상 교차 검증 점수: {:.2f}".format(grid_search.best_score_))
+print("최고 성능 모델:\n{}".format(grid_search.best_estimator_))
+
+results = pd.DataFrame(grid_search.cv_results_)
+pd.set_option("display.max_columns", None)
+display(results.head())
+display(np.transpose(results.head()))
+
+# scores = np.array(results.mean_test_score).reshape(6, 6)
+mean_test_score = np.array(results["mean_test_score"])
+if mean_test_score.ndim != 1:
+    mean_test_score = mean_test_score.flatten()
+print("mean_test_score shape:", mean_test_score.shape)
+
+# 6x6 배열로 변환
+scores = mean_test_score.reshape(6, 6)
+print("scores shape:", scores.shape)
+
+mglearn.tools.heatmap(
+    scores,
+    xlabel="gamma",
+    xticklabels=param_grid["gamma"],
+    ylabel="C",
+    yticklabels=param_grid["C"],
+    cmap="viridis",
+)
+plt.show()
