@@ -375,3 +375,8 @@ plt.xlabel("정밀도")
 plt.ylabel("재현율")
 plt.legend(loc="best")
 plt.show()
+
+from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(n_estimators=100, random_state=0, max_features=2)
+# rf.fit(X_train, y_train)
