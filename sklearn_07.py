@@ -1,9 +1,7 @@
 import numpy as np
-from graphviz import Digraph
 from scipy import sparse
 import matplotlib.pyplot as plt
 import pandas as pd
-from IPython.display import display
 import mglearn
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_breast_cancer
@@ -131,3 +129,4 @@ plt.plot(
 )
 plt.legend(loc=4)
 plt.show()
+
